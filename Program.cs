@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System;
 
@@ -9,6 +9,36 @@ namespace Attribulatorulator
 		private static void Log(string message)
 		{
 			Console.WriteLine($"ATTRIBULATORULATOR: {message}");
+		}
+
+		private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+		{
+			DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+			if (!dir.Exists)
+			{
+				throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + sourceDirName);
+			}
+
+			var dirs = dir.GetDirectories();
+
+			Directory.CreateDirectory(destDirName);
+
+			var files = dir.GetFiles();
+			foreach (var file in files)
+			{
+				string tempPath = Path.Combine(destDirName, file.Name);
+				file.CopyTo(tempPath, false);
+			}
+
+			if (copySubDirs)
+			{
+				foreach (var subdir in dirs)
+				{
+					string tempPath = Path.Combine(destDirName, subdir.Name);
+					DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
+				}
+			}
 		}
 
 		public static void Main(string[] args)
@@ -28,6 +58,17 @@ namespace Attribulatorulator
 				Log("Attribulator.CLI.exe not found.");
 
 				return;
+			}
+
+			if (!Directory.Exists("Vanilla_Unpacked"))
+			{
+				Log("Please name the vanilla Unpacked directory to Vanilla_Unpacked");
+				return;
+			}
+
+			if (!Directory.Exists("Unpacked"))
+			{
+				DirectoryCopy("Vanilla_Unpacked", "Unpacked", true);
 			}
 
 			var rootDirectory = args[1];
@@ -53,19 +94,14 @@ namespace Attribulatorulator
 
 			Log("Deleting residue folders...");
 
-			Directory.Delete("Unpacked", true);
-
-			var dirs = Directory.GetDirectories(Directory.GetCurrentDirectory(), "Unpacked_*");
-
-			if (dirs.Length > 0)
+			Directory.Delete("Unpacked");
+			foreach (var dir in Directory.GetDirectories(Directory.GetCurrentDirectory(), "Unpacked*"))
 			{
-				Directory.Move(dirs[0], "Unpacked");
+				Directory.Delete(dir, true);
 			}
 
-			else
-			{
-				Log("Could not find Unpacked_*.");
-			}
+			DirectoryCopy("Vanilla_Unpacked", "Unpacked", true);
+
 
 			Log("Done!");
 		}
