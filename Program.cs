@@ -11,8 +11,18 @@ namespace Attribulatorulator
 			Console.WriteLine($"ATTRIBULATORULATOR: {message}");
 		}
 
-		public static void Main()
+		public static void Main(string[] args)
 		{
+			if (args.Length < 2)
+			{
+				Log("Not enough arguments provided.");
+				Log("Usage: Attribulatorulator.exe path\\to\\attribulator path\\to\\scripts");
+
+				return;
+			}
+
+			Directory.SetCurrentDirectory(args[0]);
+
 			if (!File.Exists("Attribulator.CLI.exe"))
 			{
 				Log("Attribulator.CLI.exe not found.");
@@ -20,19 +30,16 @@ namespace Attribulatorulator
 				return;
 			}
 
-			var rootDirectory = "D:\\Dev\\nfsco-bin\\scripts\\nfsms";
+			var rootDirectory = args[1];
+			var scripts = "";
 
-			var subDirectories = new[]
+			foreach (var subDirectory in new[]
 			{
 				"shared",
 				"attribulator",
-			};
-
-			var scripts = "";
-
-			foreach (var subDirectory in subDirectories)
+			})
 			{
-				foreach (var file in Directory.GetFiles($"{rootDirectory}\\{subDirectory}", "*.nfsms"))
+				foreach (var file in Directory.GetFiles($"{rootDirectory}\\{subDirectory}", "*.nfsms", SearchOption.AllDirectories))
 				{
 					Log($"Including script {file}.");
 
@@ -42,9 +49,7 @@ namespace Attribulatorulator
 
 			Log("Starting Attribulator...");
 
-			var attribulatorProcess = Process.Start("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}");
-
-			attribulatorProcess.WaitForExit();
+			Process.Start("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}").WaitForExit();
 
 			Log("Deleting residue folders...");
 
@@ -56,6 +61,13 @@ namespace Attribulatorulator
 			{
 				Directory.Move(dirs[0], "Unpacked");
 			}
+
+			else
+			{
+				Log("Could not find Unpacked_*.");
+			}
+
+			Log("Done!");
 		}
 	}
 }
