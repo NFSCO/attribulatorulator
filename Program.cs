@@ -20,23 +20,18 @@ namespace Attribulatorulator
 				throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + sourceDirName);
 			}
 
-			var dirs = dir.GetDirectories();
-
 			Directory.CreateDirectory(destDirName);
 
-			var files = dir.GetFiles();
-			foreach (var file in files)
+			foreach (var file in dir.GetFiles())
 			{
-				string tempPath = Path.Combine(destDirName, file.Name);
-				file.CopyTo(tempPath, false);
+				file.CopyTo(Path.Combine(destDirName, file.Name), false);
 			}
 
 			if (copySubDirs)
 			{
-				foreach (var subdir in dirs)
+				foreach (var subdir in dir.GetDirectories())
 				{
-					string tempPath = Path.Combine(destDirName, subdir.Name);
-					DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
+					DirectoryCopy(subdir.FullName, Path.Combine(destDirName, subdir.Name), copySubDirs);
 				}
 			}
 		}
@@ -62,7 +57,8 @@ namespace Attribulatorulator
 
 			if (!Directory.Exists("Vanilla_Unpacked"))
 			{
-				Log("Please name the vanilla Unpacked directory to Vanilla_Unpacked");
+				Log("Please rename the vanilla Unpacked directory to Vanilla_Unpacked.");
+
 				return;
 			}
 
@@ -88,20 +84,24 @@ namespace Attribulatorulator
 				}
 			}
 
-			Log("Starting Attribulator...");
-
 			Process.Start("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}").WaitForExit();
 
-			Log("Deleting residue folders...");
+			if (Directory.Exists("Packed"))
+			{
+				Directory.Delete("Unpacked", true);
+			}
 
-			Directory.Delete("Unpacked");
+			else
+			{
+				Log("Skipping deletion of Unpacked, Packed folder not found.");
+			}
+
 			foreach (var dir in Directory.GetDirectories(Directory.GetCurrentDirectory(), "Unpacked*"))
 			{
 				Directory.Delete(dir, true);
 			}
 
 			DirectoryCopy("Vanilla_Unpacked", "Unpacked", true);
-
 
 			Log("Done!");
 		}
