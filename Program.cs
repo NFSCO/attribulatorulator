@@ -6,42 +6,58 @@ namespace Attribulatorulator
 {
 	public class Program
 	{
+		private static string ms_VanillaUnpackedFolderName = "VanillaUnpacked";
+
 		private static void Log(string message)
 		{
-			Console.WriteLine($"ATTRIBULATORULATOR: {message}");
+			Console.WriteLine(message);
 		}
 
-		private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+		private static void CopyDirectory(string srcDirectory, string dstDirectory, bool copySubDirectories)
 		{
-			DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+			var directory = new DirectoryInfo(srcDirectory);
 
-			if (!dir.Exists)
+			if (directory.Exists)
 			{
-				throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + sourceDirName);
-			}
+				Directory.CreateDirectory(dstDirectory);
 
-			Directory.CreateDirectory(destDirName);
-
-			foreach (var file in dir.GetFiles())
-			{
-				file.CopyTo(Path.Combine(destDirName, file.Name), false);
-			}
-
-			if (copySubDirs)
-			{
-				foreach (var subdir in dir.GetDirectories())
+				foreach (var file in directory.GetFiles())
 				{
-					DirectoryCopy(subdir.FullName, Path.Combine(destDirName, subdir.Name), copySubDirs);
+					file.CopyTo(Path.Combine(dstDirectory, file.Name), true);
 				}
+
+				if (copySubDirectories)
+				{
+					foreach (var subDirectory in directory.GetDirectories())
+					{
+						CopyDirectory(subDirectory.FullName, Path.Combine(dstDirectory, subDirectory.Name), copySubDirectories);
+					}
+				}
+			}
+
+			else
+			{
+				throw new DirectoryNotFoundException($"Source directory {srcDirectory} does not exist or could not be found.");
+
 			}
 		}
 
 		public static void Main(string[] args)
 		{
-			if (args.Length < 2)
+			var dstDirectory = "";
+
+			if (args.Length > 1)
+			{
+				if (args.Length > 2)
+				{
+					dstDirectory = args[2];
+				}
+			}
+
+			else
 			{
 				Log("Not enough arguments provided.");
-				Log("Usage: Attribulatorulator.exe path\\to\\attribulator path\\to\\scripts");
+				Log("Usage: Attribulatorulator.exe path\\to\\attribulator path\\to\\nfsms\\scripts [destination\\path].");
 
 				return;
 			}
@@ -55,16 +71,16 @@ namespace Attribulatorulator
 				return;
 			}
 
-			if (!Directory.Exists("Vanilla_Unpacked"))
+			if (!Directory.Exists(ms_VanillaUnpackedFolderName))
 			{
-				Log("Please rename the vanilla Unpacked directory to Vanilla_Unpacked.");
+				Log($"{ms_VanillaUnpackedFolderName} not found.");
 
 				return;
 			}
 
 			if (!Directory.Exists("Unpacked"))
 			{
-				DirectoryCopy("Vanilla_Unpacked", "Unpacked", true);
+				CopyDirectory(ms_VanillaUnpackedFolderName, "Unpacked", true);
 			}
 
 			var rootDirectory = args[1];
@@ -88,6 +104,11 @@ namespace Attribulatorulator
 
 			if (Directory.Exists("Packed"))
 			{
+				if (!string.IsNullOrEmpty(dstDirectory) && Directory.Exists(dstDirectory))
+				{
+					CopyDirectory("Packed\\main", dstDirectory, false);
+				}
+
 				Directory.Delete("Unpacked", true);
 			}
 
@@ -101,7 +122,7 @@ namespace Attribulatorulator
 				Directory.Delete(dir, true);
 			}
 
-			DirectoryCopy("Vanilla_Unpacked", "Unpacked", true);
+			CopyDirectory(ms_VanillaUnpackedFolderName, "Unpacked", true);
 
 			Log("Done!");
 		}
