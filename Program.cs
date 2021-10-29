@@ -38,7 +38,6 @@ namespace Attribulatorulator
 			else
 			{
 				throw new DirectoryNotFoundException($"Source directory {srcDirectory} does not exist or could not be found.");
-
 			}
 		}
 
