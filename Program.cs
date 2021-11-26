@@ -77,10 +77,20 @@ namespace Attribulatorulator
 				return;
 			}
 
-			if (!Directory.Exists("Unpacked"))
+			// delete folders from past compilation.
+			foreach (var directory in new[]
 			{
-				CopyDirectory(ms_VanillaUnpackedFolderName, "Unpacked", true);
+				"Packed",
+				"Unpacked",
+			})
+			{
+				if (Directory.Exists(directory))
+				{
+					Directory.Delete(directory, true);
+				}
 			}
+
+			CopyDirectory(ms_VanillaUnpackedFolderName, "Unpacked", true);
 
 			var rootDirectory = args[1];
 			var scripts = "";
@@ -106,6 +116,9 @@ namespace Attribulatorulator
 				if (!string.IsNullOrEmpty(dstDirectory) && Directory.Exists(dstDirectory))
 				{
 					CopyDirectory("Packed\\main", dstDirectory, false);
+
+					// if we have a post-build copy directory, also delete the Packed folder.
+					Directory.Delete("Packed", true);
 				}
 
 				Directory.Delete("Unpacked", true);
@@ -120,8 +133,6 @@ namespace Attribulatorulator
 			{
 				Directory.Delete(dir, true);
 			}
-
-			CopyDirectory(ms_VanillaUnpackedFolderName, "Unpacked", true);
 
 			Log("Done!");
 		}
