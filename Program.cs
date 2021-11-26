@@ -56,7 +56,7 @@ namespace Attribulatorulator
 			else
 			{
 				Log("Not enough arguments provided.");
-				Log("Usage: Attribulatorulator.exe path\\to\\attribulator path\\to\\nfsms\\scripts [destination\\path].");
+				Log("Usage: Attribulatorulator.exe path/to/attribulator path/to/repository [destination/path].");
 
 				return;
 			}
@@ -95,13 +95,31 @@ namespace Attribulatorulator
 			var rootDirectory = args[1];
 			var scripts = "";
 
+			foreach (var script in Directory.GetFiles($"{rootDirectory}/scripts/lua", "*.lua", SearchOption.AllDirectories))
+			{
+				var scriptLua = Path.GetFileName(script);
+				var dstHandler = Path.ChangeExtension(scriptLua, ".bin");
+
+				Log($"Compiling {scriptLua}...");
+
+				foreach (var srcHandler in Directory.GetFiles("Unpacked", "*.bin", SearchOption.AllDirectories))
+				{
+					if (Path.GetFileName(srcHandler) == dstHandler)
+					{
+						Process.Start($"{rootDirectory}/tools/luac.exe", $"-o {srcHandler} {script}").WaitForExit();
+
+						break;
+					}
+				}
+			}
+
 			foreach (var subDirectory in new[]
 			{
 				"shared",
 				"attribulator",
 			})
 			{
-				foreach (var file in Directory.GetFiles($"{rootDirectory}\\{subDirectory}", "*.nfsms", SearchOption.AllDirectories))
+				foreach (var file in Directory.GetFiles($"{rootDirectory}/scripts/nfsms/{subDirectory}", "*.nfsms", SearchOption.AllDirectories))
 				{
 					Log($"Including script {file}.");
 
@@ -115,7 +133,7 @@ namespace Attribulatorulator
 			{
 				if (!string.IsNullOrEmpty(dstDirectory) && Directory.Exists(dstDirectory))
 				{
-					CopyDirectory("Packed\\main", dstDirectory, false);
+					CopyDirectory("Packed/main", dstDirectory, false);
 
 					// if we have a post-build copy directory, also delete the Packed folder.
 					Directory.Delete("Packed", true);
