@@ -8,10 +8,7 @@ namespace Attribulatorulator
 	{
 		private static string ms_VanillaUnpackedFolderName = "VanillaUnpacked";
 
-		private static void Log(string message)
-		{
-			Console.WriteLine(message);
-		}
+		private static void Log(string message) => Console.WriteLine(message);
 
 		private static void CopyDirectory(string srcDirectory, string dstDirectory, bool copySubDirectories)
 		{
@@ -121,15 +118,13 @@ namespace Attribulatorulator
 			{
 				foreach (var file in Directory.GetFiles($"{rootDirectory}/scripts/nfsms/{subDirectory}", "*.nfsms", SearchOption.AllDirectories))
 				{
-					Log($"Including script {file}.");
-
 					scripts += $"{file} ";
 				}
 			}
 
 			Process.Start("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}").WaitForExit();
 
-			if (Directory.Exists("Packed"))
+			if (Directory.Exists("Packed/main"))
 			{
 				if (!string.IsNullOrEmpty(dstDirectory) && Directory.Exists(dstDirectory))
 				{
@@ -145,11 +140,6 @@ namespace Attribulatorulator
 			else
 			{
 				Log("Skipping deletion of Unpacked, Packed folder not found.");
-			}
-
-			foreach (var dir in Directory.GetDirectories(Directory.GetCurrentDirectory(), "Unpacked*"))
-			{
-				Directory.Delete(dir, true);
 			}
 
 			Log("Done!");
