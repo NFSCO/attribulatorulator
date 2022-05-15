@@ -6,9 +6,116 @@ namespace Attribulatorulator
 {
 	public class Program
 	{
-		private static string ms_VanillaUnpackedFolderName = "VanillaUnpacked";
+		private static readonly string ms_VanillaUnpackedDirectoryName = "VanillaUnpacked";
 
-		private static void Log(string message) => Console.WriteLine(message);
+		private static void Build(string rootDirectory, string dstDirectory)
+		{
+			// delete directories from past compilation, if any.
+			foreach (var directory in new[]
+			{
+				"Packed",
+				"Unpacked",
+			})
+			{
+				if (Directory.Exists(directory))
+				{
+					Directory.Delete(directory, true);
+				}
+			}
+
+			CopyDirectory(ms_VanillaUnpackedDirectoryName, "Unpacked", true);
+
+			BuildScriptsLua(rootDirectory, $"{rootDirectory}/scripts/lua");
+			BuildScriptsNFSMS($"{rootDirectory}/scripts/nfsms");
+
+			if (Directory.Exists("Packed/main"))
+			{
+				if (Directory.Exists(dstDirectory))
+				{
+					CopyDirectory("Packed/main", dstDirectory, false);
+
+					// if we have a post-build copy directory, also delete the Packed directory.
+					Directory.Delete("Packed", true);
+				}
+
+				Directory.Delete("Unpacked", true);
+			}
+
+			else
+			{
+				Log("Skipping deletion of directory Unpacked, directory Packed doesn't exist.");
+			}
+
+			Log("Done!");
+		}
+
+		private static void BuildScriptsLua(string rootDirectory, string scriptsDirectory)
+		{
+			if (Directory.Exists(scriptsDirectory))
+			{
+				var compilerPath = $"{rootDirectory}/tools/luac.exe";
+
+				if (File.Exists(compilerPath))
+				{
+					var compiledScriptFiles = Directory.GetFiles("Unpacked", "*.bin", SearchOption.AllDirectories);
+
+					foreach (var script in Directory.GetFiles(scriptsDirectory, "*.lua", SearchOption.AllDirectories))
+					{
+						var srcFile = Path.GetFileName(script);
+						var dstFile = Path.ChangeExtension(srcFile, ".bin");
+
+						Log($"Compiling Lua script {srcFile}...");
+
+						foreach (var compiledScriptFile in compiledScriptFiles)
+						{
+							if (Path.GetFileName(compiledScriptFile) == dstFile)
+							{
+								Process.Start(compilerPath, $"-o {compiledScriptFile} {script}").WaitForExit();
+
+								break;
+							}
+						}
+					}
+				}
+
+				else
+				{
+					Log("File luac.exe doesn't exist.");
+				}
+			}
+
+			else
+			{
+				Log($"Directory {scriptsDirectory} doesn't exist.");
+			}
+		}
+
+		private static void BuildScriptsNFSMS(string scriptsDirectory)
+		{
+			var scripts = "";
+
+			if (Directory.Exists(scriptsDirectory))
+			{
+				foreach (var subDirectory in new[]
+				{
+					"shared",
+					"attribulator",
+				})
+				{
+					foreach (var file in Directory.GetFiles($"{scriptsDirectory}/{subDirectory}", "*.nfsms", SearchOption.AllDirectories))
+					{
+						scripts += $"{file} ";
+					}
+				}
+			}
+
+			else
+			{
+				Log($"Directory {scriptsDirectory} doesn't exist.");
+			}
+
+			Process.Start("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}").WaitForExit();
+		}
 
 		private static void CopyDirectory(string srcDirectory, string dstDirectory, bool copySubDirectories)
 		{
@@ -34,13 +141,15 @@ namespace Attribulatorulator
 
 			else
 			{
-				throw new DirectoryNotFoundException($"Source directory {srcDirectory} does not exist or could not be found.");
+				throw new DirectoryNotFoundException($"Directory {srcDirectory} doesn't exist.");
 			}
 		}
 
+		private static void Log(string message) => Console.WriteLine(message);
+
 		public static void Main(string[] args)
 		{
-			var dstDirectory = "";
+			var dstDirectory = string.Empty;
 
 			if (args.Length > 1)
 			{
@@ -48,101 +157,43 @@ namespace Attribulatorulator
 				{
 					dstDirectory = args[2];
 				}
+
+				var attribulatorDirectory = args[0];
+
+				if (Directory.Exists(attribulatorDirectory))
+				{
+					Directory.SetCurrentDirectory(attribulatorDirectory);
+
+					if (Directory.Exists(ms_VanillaUnpackedDirectoryName))
+					{
+						if (File.Exists("Attribulator.CLI.exe"))
+						{
+							Build(args[1], dstDirectory);
+						}
+
+						else
+						{
+							Log("File Attribulator.CLI.exe doesn't exist.");
+						}
+					}
+
+					else
+					{
+						Log($"Directory {ms_VanillaUnpackedDirectoryName} doesn't exist.");
+					}
+				}
+
+				else
+				{
+					Log($"Directory {attribulatorDirectory} doesn't exist.");
+				}
 			}
 
 			else
 			{
 				Log("Not enough arguments provided.");
-				Log("Usage: Attribulatorulator.exe path/to/attribulator path/to/repository [destination/path].");
-
-				return;
+				Log($"Usage: {Process.GetCurrentProcess().ProcessName} path/to/attribulator path/to/repository [path/to/copy/post/build].");
 			}
-
-			Directory.SetCurrentDirectory(args[0]);
-
-			if (!File.Exists("Attribulator.CLI.exe"))
-			{
-				Log("Attribulator.CLI.exe not found.");
-
-				return;
-			}
-
-			if (!Directory.Exists(ms_VanillaUnpackedFolderName))
-			{
-				Log($"{ms_VanillaUnpackedFolderName} not found.");
-
-				return;
-			}
-
-			// delete folders from past compilation.
-			foreach (var directory in new[]
-			{
-				"Packed",
-				"Unpacked",
-			})
-			{
-				if (Directory.Exists(directory))
-				{
-					Directory.Delete(directory, true);
-				}
-			}
-
-			CopyDirectory(ms_VanillaUnpackedFolderName, "Unpacked", true);
-
-			var rootDirectory = args[1];
-			var scripts = "";
-
-			foreach (var script in Directory.GetFiles($"{rootDirectory}/scripts/lua", "*.lua", SearchOption.AllDirectories))
-			{
-				var scriptLua = Path.GetFileName(script);
-				var dstHandler = Path.ChangeExtension(scriptLua, ".bin");
-
-				Log($"Compiling {scriptLua}...");
-
-				foreach (var srcHandler in Directory.GetFiles("Unpacked", "*.bin", SearchOption.AllDirectories))
-				{
-					if (Path.GetFileName(srcHandler) == dstHandler)
-					{
-						Process.Start($"{rootDirectory}/tools/luac.exe", $"-o {srcHandler} {script}").WaitForExit();
-
-						break;
-					}
-				}
-			}
-
-			foreach (var subDirectory in new[]
-			{
-				"shared",
-				"attribulator",
-			})
-			{
-				foreach (var file in Directory.GetFiles($"{rootDirectory}/scripts/nfsms/{subDirectory}", "*.nfsms", SearchOption.AllDirectories))
-				{
-					scripts += $"{file} ";
-				}
-			}
-
-			Process.Start("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}").WaitForExit();
-
-			if (Directory.Exists("Packed/main"))
-			{
-				if (!string.IsNullOrEmpty(dstDirectory) && Directory.Exists(dstDirectory))
-				{
-					CopyDirectory("Packed/main", dstDirectory, false);
-
-					// if we have a post-build copy directory, also delete the Packed folder.
-					Directory.Delete("Packed", true);
-				}
-
-				Directory.Delete("Unpacked", true);
-			}
-
-			else
-			{
-				Log("Skipping deletion of Unpacked, Packed folder not found.");
-			}
-
-			Log("Done!");
 		}
 	}
 }
