@@ -24,7 +24,6 @@ namespace Attribulatorulator
 			}
 
 			CopyDirectory(ms_VanillaUnpackedDirectoryName, "Unpacked", true);
-
 			BuildScriptsLua(rootDirectory, $"{rootDirectory}/scripts/lua");
 			BuildScriptsNFSMS($"{rootDirectory}/scripts/nfsms");
 
@@ -38,12 +37,15 @@ namespace Attribulatorulator
 					Directory.Delete("Packed", true);
 				}
 
-				Directory.Delete("Unpacked", true);
+				foreach (var directory in Directory.GetDirectories(Directory.GetCurrentDirectory(), "Unpacked*"))
+				{
+					Directory.Delete(directory, true);
+				}
 			}
 
 			else
 			{
-				Log("Skipping deletion of directory Unpacked, directory Packed doesn't exist.");
+				Log("Skipping directory clean-up, directory Packed doesn't exist.");
 			}
 
 			Log("Done!");
@@ -57,25 +59,18 @@ namespace Attribulatorulator
 
 				if (File.Exists(compilerPath))
 				{
-					var compiledScriptFiles = Directory.GetFiles("Unpacked", "*.bin", SearchOption.AllDirectories);
-
+					// compile each script in place.
 					foreach (var script in Directory.GetFiles(scriptsDirectory, "*.lua", SearchOption.AllDirectories))
 					{
 						var srcFile = Path.GetFileName(script);
-						var dstFile = Path.ChangeExtension(srcFile, ".bin");
+						var dstFile = Path.Combine(Path.GetDirectoryName(script), Path.ChangeExtension(srcFile, ".bin"));
 
 						Log($"Compiling Lua script {srcFile}...");
 
-						foreach (var compiledScriptFile in compiledScriptFiles)
-						{
-							if (Path.GetFileName(compiledScriptFile) == dstFile)
-							{
-								Process.Start(compilerPath, $"-o {compiledScriptFile} {script}").WaitForExit();
-
-								break;
-							}
-						}
+						Process.Start(compilerPath, $"-o {dstFile} {script}").WaitForExit();
 					}
+
+					CopyDirectory(scriptsDirectory, "Unpacked/main/gameplay", true);
 				}
 
 				else

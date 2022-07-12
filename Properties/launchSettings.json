@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Attribulatorulator": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:\\Program Files\\Attribulator\" \"D:\\Dev\\nfsco-bin\" \"D:\\Projects\\NFSCO\\NFSCO\\vaults\\nfsco\\GLOBAL\""
+    }
+  }
+}
