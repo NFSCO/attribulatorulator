@@ -65,9 +65,11 @@ namespace Attribulatorulator
 						var srcFile = Path.GetFileName(script);
 						var dstFile = Path.Combine(Path.GetDirectoryName(script), Path.ChangeExtension(srcFile, ".bin"));
 
-						Log($"Compiling Lua script {srcFile}...");
+						var process = Process.Start(compilerPath, $"-s -o {dstFile} {script}");
 
-						Process.Start(compilerPath, $"-o {dstFile} {script}").WaitForExit();
+						process.WaitForExit();
+
+						Log($"Compiled Lua script {srcFile}. ({process.ExitCode})");
 					}
 
 					CopyDirectory(scriptsDirectory, "Unpacked/main/gameplay", true);
