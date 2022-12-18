@@ -97,7 +97,14 @@ namespace Attribulatorulator
 
 						process.WaitForExit();
 
-						Logging.Message($"Compiled Lua script {srcFile}. ({process.ExitCode})");
+						var exitCode = process.ExitCode;
+
+						Logging.Message($"{compilerName} exited with code {exitCode} for script {srcFile}.");
+
+						if (exitCode != 0)
+						{
+							return false;
+						}
 					}
 
 					return FileSystem.CopyDirectory(scriptsDirectory, "Unpacked/main/gameplay", true);
@@ -147,13 +154,14 @@ namespace Attribulatorulator
 			{
 				Logging.Message($"Compiling {scriptsCount} NFSMS script(s)...");
 
-				var process = Process.Start("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}");
+				var attribulatorName = "Attribulator.CLI.exe";
+				var process = Process.Start(attribulatorName, $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}");
 
 				process.WaitForExit();
 
 				var exitCode = process.ExitCode;
 
-				Logging.Message($"Attribulator exited with code {exitCode}.");
+				Logging.Message($"{attribulatorName} exited with code {exitCode}.");
 
 				return exitCode == 0;
 			}
