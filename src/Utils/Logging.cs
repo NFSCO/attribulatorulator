@@ -1,6 +1,6 @@
 using System;
 
-namespace Attribulator.Utils
+namespace Attribulatorulator.Utils
 {
 	public static class Logging
 	{

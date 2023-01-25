@@ -1,7 +1,6 @@
-using System.Diagnostics;
 using System.IO;
 
-using Attribulator.Utils;
+using Attribulatorulator.Utils;
 
 namespace Attribulatorulator
 {
@@ -91,18 +90,12 @@ namespace Attribulatorulator
 					// compile each script in place.
 					foreach (var script in Directory.GetFiles(scriptsDirectory, "*.lua", SearchOption.AllDirectories))
 					{
-						var srcFile = Path.GetFileName(script);
-						var dstFile = Path.Combine(Path.GetDirectoryName(script), Path.ChangeExtension(srcFile, ".bin"));
-						var process = Process.Start(compilerPath, $"-s -o {dstFile} {script}");
+						var dstFile = Path.Combine(Path.GetDirectoryName(script), Path.ChangeExtension(Path.GetFileName(script), ".bin"));
 
-						process.WaitForExit();
-
-						var exitCode = process.ExitCode;
-
-						Logging.Message($"{compilerName} exited with code {exitCode} for script {srcFile}.");
-
-						if (exitCode != 0)
+						if (!Process.Create(compilerPath, $"-s -o {dstFile} {script}"))
 						{
+							Logging.Message($"Script {script} could not compile.");
+
 							return false;
 						}
 					}
@@ -154,16 +147,7 @@ namespace Attribulatorulator
 			{
 				Logging.Message($"Compiling {scriptsCount} NFSMS script(s)...");
 
-				var attribulatorName = "Attribulator.CLI.exe";
-				var process = Process.Start(attribulatorName, $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}");
-
-				process.WaitForExit();
-
-				var exitCode = process.ExitCode;
-
-				Logging.Message($"{attribulatorName} exited with code {exitCode}.");
-
-				return exitCode == 0;
+				return Process.Create("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}");
 			}
 
 			return true;
@@ -218,7 +202,9 @@ namespace Attribulatorulator
 
 			else
 			{
-				Logging.Message($"Usage: {Process.GetCurrentProcess().ProcessName} path/to/attribulator path/to/repository [path/to/copy/post/build].");
+				var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+
+				Logging.Message($"Usage: {currentProcess.ProcessName} path/to/attribulator path/to/repository [path/to/copy/post/build].");
 			}
 
 			return false;

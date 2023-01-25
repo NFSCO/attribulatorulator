@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-using Attribulator.Utils;
+using Attribulatorulator.Utils;
 
 namespace Attribulatorulator
 {
