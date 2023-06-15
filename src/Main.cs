@@ -28,19 +28,19 @@ namespace Attribulatorulator
 				return false;
 			}
 
-			var scriptsDirectory = $"{rootDirectory}/scripts/";
+			var scriptsDirectory = Path.Combine(rootDirectory, "src");
 
-			if (!BuildScriptsLua(rootDirectory, $"{scriptsDirectory}lua"))
+			if (!BuildScriptsLua(rootDirectory, Path.Combine(scriptsDirectory, "lua")))
 			{
 				return false;
 			}
 
-			if (!BuildScriptsNFSMS($"{scriptsDirectory}nfsms"))
+			if (!BuildScriptsNFSMS(Path.Combine(scriptsDirectory, "nfsms")))
 			{
 				return false;
 			}
 
-			var mainDirectory = "Packed/main";
+			var mainDirectory = Path.Combine("Packed", "main");
 
 			if (FileSystem.DirectoryExists(mainDirectory))
 			{
@@ -83,7 +83,7 @@ namespace Attribulatorulator
 			if (FileSystem.DirectoryExists(scriptsDirectory))
 			{
 				var compilerName = "luac.exe";
-				var compilerPath = $"{rootDirectory}/tools/{compilerName}";
+				var compilerPath = Path.Combine(rootDirectory, "tools", compilerName);
 
 				if (File.Exists(compilerPath))
 				{
@@ -130,7 +130,7 @@ namespace Attribulatorulator
 					"attribulator",
 				})
 				{
-					foreach (var file in Directory.GetFiles($"{scriptsDirectory}/{subDirectory}", "*.nfsms", SearchOption.AllDirectories))
+					foreach (var file in Directory.GetFiles(Path.Combine(scriptsDirectory, subDirectory), "*.nfsms", SearchOption.AllDirectories))
 					{
 						scripts += $"{file} ";
 						++scriptsCount;
