@@ -13,7 +13,13 @@ Install [Visual Studio](https://visualstudio.microsoft.com) with the `.NET 6.0 R
 git clone https://github.com/NFSCO/attribulatorulator
 ```
 
-3. Compile the project.
+3. Change the directory.
+
+```
+cd attribulatorulator
+```
+
+4. Compile the project.
 
 ### Usage
-Run `Attribulatorulator.exe` for usage examples.
+Run `Attribulatorulator.exe`.
