@@ -5,11 +5,11 @@ Attribulatorulator is a C# command-line utility for compiling AttribSys database
 Install [Visual Studio](https://visualstudio.microsoft.com) with the `.NET 6.0 Runtime (Long Term Support)` workload.
 
 ### Compiling
-1. Open `Command Prompt` or `PowerShell`.
+1. Open `Command Prompt`.
 
-2. Clone the repository using the following command.
+2. Clone the repository.
 
-```bash
+```
 git clone https://github.com/NFSCO/attribulatorulator
 ```
 
