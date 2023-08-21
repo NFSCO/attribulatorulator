@@ -19,7 +19,7 @@ git clone https://github.com/NFSCO/attribulatorulator
 cd attribulatorulator
 ```
 
-4. Compile the project.
+4. Compile the solution.
 
 ### Usage
 Run `Attribulatorulator.exe`.
