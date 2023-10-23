@@ -23,3 +23,6 @@ cd attribulatorulator
 
 ### Usage
 Run `Attribulatorulator.exe`.
+
+### Credits
+See [CREDITS.md](https://github.com/NFSCO/documentation/blob/master/docs/CREDITS.md).
