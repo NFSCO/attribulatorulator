@@ -22,7 +22,6 @@ namespace Attribulatorulator
 
 				return exitCode == 0;
 			}
-
 			catch (Exception e)
 			{
 				Logging.Message($"An exception occurred while attempting to create process {path}.");

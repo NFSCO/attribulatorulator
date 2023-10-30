@@ -7,6 +7,7 @@ namespace Attribulatorulator
 	public class Program
 	{
 		private static readonly string ms_VanillaUnpackedDirectoryName = "VanillaUnpacked";
+		private static readonly string ms_AttribulatorExecutableName = "Attribulator.CLI.exe";
 
 		private static bool Build(string rootDirectory, string dstDirectory)
 		{
@@ -69,7 +70,6 @@ namespace Attribulatorulator
 
 				return true;
 			}
-
 			else
 			{
 				Logging.Message("Skipping directory clean-up, directory Packed does not exist.");
@@ -102,13 +102,11 @@ namespace Attribulatorulator
 
 					return FileSystem.CopyDirectory(scriptsDirectory, "Unpacked/main/gameplay", true);
 				}
-
 				else
 				{
 					Logging.Message($"File {compilerName} does not exist.");
 				}
 			}
-
 			else
 			{
 				Logging.Message($"Directory {scriptsDirectory} does not exist.");
@@ -119,8 +117,7 @@ namespace Attribulatorulator
 
 		private static bool BuildScriptsNFSMS(string scriptsDirectory)
 		{
-			var scripts = string.Empty;
-			var scriptsCount = 0;
+			var directories = string.Empty;
 
 			if (FileSystem.DirectoryExists(scriptsDirectory))
 			{
@@ -130,27 +127,15 @@ namespace Attribulatorulator
 					"attribulator",
 				})
 				{
-					foreach (var file in Directory.GetFiles(Path.Combine(scriptsDirectory, subDirectory), "*.nfsms", SearchOption.AllDirectories))
-					{
-						scripts += $"{file} ";
-						++scriptsCount;
-					}
+					directories += $"{Path.Combine(scriptsDirectory, subDirectory)} ";
 				}
 			}
-
 			else
 			{
 				Logging.Message($"Directory {scriptsDirectory} does not exist.");
 			}
 
-			if (scriptsCount > 0)
-			{
-				Logging.Message($"Compiling {scriptsCount} NFSMS script(s)...");
-
-				return Process.Create("Attribulator.CLI.exe", $"apply-script -i Unpacked -o Packed -p CARBON -s {scripts}");
-			}
-
-			return true;
+			return Process.Create(ms_AttribulatorExecutableName, $"apply-script -i Unpacked -o Packed -p CARBON -s {directories}");
 		}
 
 		private static bool Build(string[] args)
@@ -175,31 +160,25 @@ namespace Attribulatorulator
 
 					if (FileSystem.DirectoryExists(ms_VanillaUnpackedDirectoryName))
 					{
-						var attribulatorName = "Attribulator.CLI.exe";
-
-						if (File.Exists(attribulatorName))
+						if (File.Exists(ms_AttribulatorExecutableName))
 						{
 							return Build(args[1], dstDirectory);
 						}
-
 						else
 						{
-							Logging.Message($"File {attribulatorName} does not exist.");
+							Logging.Message($"File {ms_AttribulatorExecutableName} does not exist.");
 						}
 					}
-
 					else
 					{
 						Logging.Message($"Directory {ms_VanillaUnpackedDirectoryName} does not exist.");
 					}
 				}
-
 				else
 				{
 					Logging.Message($"Directory {attribulatorDirectory} does not exist.");
 				}
 			}
-
 			else
 			{
 				var currentProcess = System.Diagnostics.Process.GetCurrentProcess();

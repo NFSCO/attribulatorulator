@@ -10,7 +10,7 @@ Install [Attribulator](https://github.com/NFSTools/Attribulator) and [Visual Stu
 2. Clone the repository.
 
 ```
-git clone https://github.com/NFSCO/attribulatorulator
+git clone https://github.com/NFSCO/attribulatorulator.git
 ```
 
 3. Change the directory.

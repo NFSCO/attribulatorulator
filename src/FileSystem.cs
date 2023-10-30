@@ -13,7 +13,6 @@ namespace Attribulatorulator
 			{
 				return info.CopyTo(dstPath, true);
 			}
-
 			catch (Exception e)
 			{
 				Logging.Message($"An exception occurred while attempting to copy file {info.Name}.");
@@ -33,7 +32,6 @@ namespace Attribulatorulator
 
 				return true;
 			}
-
 			catch (Exception e)
 			{
 				Logging.Message($"An exception occurred while attempting to change the current directory to {path}.");
@@ -49,7 +47,6 @@ namespace Attribulatorulator
 			{
 				return Directory.CreateDirectory(path);
 			}
-
 			catch (Exception e)
 			{
 				Logging.Message($"An exception occurred while attempting to create directory {path}.");
@@ -69,14 +66,12 @@ namespace Attribulatorulator
 
 					return true;
 				}
-
 				catch (Exception e)
 				{
 					Logging.Message($"An exception occurred while attempting to delete directory {path}.");
 					Logging.Exception(e);
 				}
 			}
-
 			else
 			{
 				Logging.Message($"Directory {path} does not exist.");
@@ -121,13 +116,11 @@ namespace Attribulatorulator
 						return true;
 					}
 				}
-
 				else
 				{
 					Logging.Message($"Directory {srcPath} does not exist.");
 				}
 			}
-
 			catch (Exception e)
 			{
 				Logging.Message($"An exception occurred while attempting to copy directory {srcPath} to directory {dstPath}.");
