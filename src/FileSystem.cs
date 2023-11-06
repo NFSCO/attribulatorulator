@@ -15,7 +15,7 @@ namespace Attribulatorulator
 			}
 			catch (Exception e)
 			{
-				Logging.Message($"An exception occurred while attempting to copy file {info.Name}.");
+				Logging.Fatal($"An exception occurred while attempting to copy file {info.Name}.");
 				Logging.Exception(e);
 			}
 
@@ -34,7 +34,7 @@ namespace Attribulatorulator
 			}
 			catch (Exception e)
 			{
-				Logging.Message($"An exception occurred while attempting to change the current directory to {path}.");
+				Logging.Fatal($"An exception occurred while attempting to change the current directory to {path}.");
 				Logging.Exception(e);
 			}
 
@@ -49,7 +49,7 @@ namespace Attribulatorulator
 			}
 			catch (Exception e)
 			{
-				Logging.Message($"An exception occurred while attempting to create directory {path}.");
+				Logging.Fatal($"An exception occurred while attempting to create directory {path}.");
 				Logging.Exception(e);
 			}
 
@@ -68,13 +68,13 @@ namespace Attribulatorulator
 				}
 				catch (Exception e)
 				{
-					Logging.Message($"An exception occurred while attempting to delete directory {path}.");
+					Logging.Fatal($"An exception occurred while attempting to delete directory {path}.");
 					Logging.Exception(e);
 				}
 			}
 			else
 			{
-				Logging.Message($"Directory {path} does not exist.");
+				Logging.Warning($"Directory {path} does not exist.");
 
 				return true;
 			}
@@ -118,12 +118,12 @@ namespace Attribulatorulator
 				}
 				else
 				{
-					Logging.Message($"Directory {srcPath} does not exist.");
+					Logging.Warning($"Directory {srcPath} does not exist.");
 				}
 			}
 			catch (Exception e)
 			{
-				Logging.Message($"An exception occurred while attempting to copy directory {srcPath} to directory {dstPath}.");
+				Logging.Fatal($"An exception occurred while attempting to copy directory {srcPath} to directory {dstPath}.");
 				Logging.Exception(e);
 			}
 

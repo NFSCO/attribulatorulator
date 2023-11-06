@@ -72,7 +72,7 @@ namespace Attribulatorulator
 			}
 			else
 			{
-				Logging.Message("Skipping directory clean-up, directory Packed does not exist.");
+				Logging.Info("Skipping directory clean-up, directory Packed does not exist.");
 			}
 
 			return false;
@@ -94,7 +94,7 @@ namespace Attribulatorulator
 
 						if (!Process.Create(compilerPath, $"-s -o {dstFile} {script}"))
 						{
-							Logging.Message($"Script {script} could not compile.");
+							Logging.Fatal($"Script {script} could not compile.");
 
 							return false;
 						}
@@ -104,12 +104,12 @@ namespace Attribulatorulator
 				}
 				else
 				{
-					Logging.Message($"File {compilerName} does not exist.");
+					Logging.Warning($"File {compilerName} does not exist.");
 				}
 			}
 			else
 			{
-				Logging.Message($"Directory {scriptsDirectory} does not exist.");
+				Logging.Warning($"Directory {scriptsDirectory} does not exist.");
 			}
 
 			return false;
@@ -132,7 +132,7 @@ namespace Attribulatorulator
 			}
 			else
 			{
-				Logging.Message($"Directory {scriptsDirectory} does not exist.");
+				Logging.Warning($"Directory {scriptsDirectory} does not exist.");
 			}
 
 			return Process.Create(ms_AttribulatorExecutableName, $"apply-script -i Unpacked -o Packed -p CARBON -s {directories}");
@@ -166,29 +166,42 @@ namespace Attribulatorulator
 						}
 						else
 						{
-							Logging.Message($"File {ms_AttribulatorExecutableName} does not exist.");
+							Logging.Fatal($"File {ms_AttribulatorExecutableName} does not exist.");
 						}
 					}
 					else
 					{
-						Logging.Message($"Directory {ms_VanillaUnpackedDirectoryName} does not exist.");
+						Logging.Fatal($"Directory {ms_VanillaUnpackedDirectoryName} does not exist.");
 					}
 				}
 				else
 				{
-					Logging.Message($"Directory {attribulatorDirectory} does not exist.");
+					Logging.Fatal($"Directory {attribulatorDirectory} does not exist.");
 				}
 			}
 			else
 			{
 				var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 
-				Logging.Message($"Usage: {currentProcess.ProcessName} path/to/attribulator path/to/repository [path/to/copy/post/build].");
+				Logging.Info($"Usage: {currentProcess.ProcessName} path/to/attribulator path/to/repository [path/to/copy/post/build].");
 			}
 
 			return false;
 		}
 
-		public static void Main(string[] args) => Logging.Message($"Build {(Build(args) ? "successful" : "failed")}.");
+		public static void Main(string[] args)
+		{
+			var result = Build(args);
+			var @string = "successful";
+			var channelIndex = 3;
+
+			if (!result)
+			{
+				@string = "failed";
+				++channelIndex;
+			}
+
+			Logging.Message(channelIndex, $"Build {@string}.");
+		}
 	}
 }

@@ -17,14 +17,18 @@ namespace Attribulatorulator
 				process.WaitForExit();
 
 				var exitCode = process.ExitCode;
+				var result = exitCode == 0;
 
-				Logging.Message($"{path} exited with code {exitCode}.");
+				if (!result)
+				{
+					Logging.Fatal($"Process {path} exited with code {exitCode}.");
+				}
 
-				return exitCode == 0;
+				return result;
 			}
 			catch (Exception e)
 			{
-				Logging.Message($"An exception occurred while attempting to create process {path}.");
+				Logging.Fatal($"An exception occurred while attempting to create process {path}.");
 				Logging.Exception(e);
 			}
 
